@@ -3,6 +3,8 @@
 
     <string name="app_name">DropDroid</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="link_to_dropbox">Link to Dropbox</string>
+    <string name="no_epubs">No epubs</string>
+    <string name="unlink_from_dropbox">Unlink from Dropbox</string>
 
 </resources>
