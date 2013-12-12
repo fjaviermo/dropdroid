@@ -39,7 +39,7 @@ public class EpubAdapter extends ArrayAdapter<DbxFileInfo> {
 			LayoutInflater inflater = mContext.getLayoutInflater();
 			rowView = inflater.inflate(R.layout.epub_row, null);
 			ViewHolder viewHolder = new ViewHolder();
-			viewHolder.epubName = (TextView) rowView.findViewById(R.id.epub_name);			
+			viewHolder.epubName = (TextView) rowView.findViewById(R.id.epub_name);
 			viewHolder.epubDate = (TextView) rowView.findViewById(R.id.epub_date);
 			viewHolder.epubSize = (TextView) rowView.findViewById(R.id.epub_size);
 			rowView.setTag(viewHolder);

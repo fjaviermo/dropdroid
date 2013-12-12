@@ -9,14 +9,17 @@ import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.fjaviermo.Utils.DropDroidConfig;
-import com.fjaviermo.adapter.EpubAdapter;
 import com.dropbox.sync.android.DbxAccountManager;
 import com.dropbox.sync.android.DbxFileInfo;
 import com.dropbox.sync.android.DbxPath;
+import com.fjaviermo.Utils.DropDroidConfig;
+import com.fjaviermo.adapter.EpubAdapter;
 
 public class EpubListFragment extends ListFragment implements LoaderCallbacks<List<DbxFileInfo>>{
 
@@ -69,8 +72,27 @@ public class EpubListFragment extends ListFragment implements LoaderCallbacks<Li
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		mAccountManager = DropDroidConfig.getAccountManager(activity);
+		setHasOptionsMenu(true);
 	}
 
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		inflater.inflate(R.menu.epub_list, menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// handle item selection
+		switch (item.getItemId()) {
+		case R.id.unlink_dropbox:
+			mAccountManager.unlink();
+            setListAdapter(null);
+			showUnlinkedView();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 0) {
