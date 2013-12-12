@@ -1,16 +1,24 @@
 package com.fjaviermo.dropdroid;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.fjaviermo.Utils.DropDroidConfig;
+import com.fjaviermo.adapter.EpubAdapter;
 import com.dropbox.sync.android.DbxAccountManager;
+import com.dropbox.sync.android.DbxFileInfo;
+import com.dropbox.sync.android.DbxPath;
 
-public class EpubListFragment extends ListFragment{
+public class EpubListFragment extends ListFragment implements LoaderCallbacks<List<DbxFileInfo>>{
 
 
 	private View mEmptyText;
@@ -49,6 +57,7 @@ public class EpubListFragment extends ListFragment{
 		super.onViewCreated(view, savedInstanceState);
 
 		getListView().setEmptyView(view.findViewById(android.R.id.empty));
+		
 		if (!mAccountManager.hasLinkedAccount()) {
 			showUnlinkedView();
 		} else {
@@ -66,13 +75,28 @@ public class EpubListFragment extends ListFragment{
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 0) {
             if (resultCode == Activity.RESULT_OK) {
-                // We are now linked.
                 showLinkedView(true);
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
+    
+	@Override
+	public Loader<List<DbxFileInfo>> onCreateLoader(int id, Bundle args) {
+		return new EpubLoader(getActivity(), mAccountManager, DbxPath.ROOT);
+	}
+
+	@Override
+	public void onLoadFinished(Loader<List<DbxFileInfo>> loader, List<DbxFileInfo> data) {
+		mLoadingSpinner.setVisibility(View.GONE);
+		mEmptyText.setVisibility(View.VISIBLE);
+
+		setListAdapter(new EpubAdapter(getActivity(), data));
+	}
+
+	@Override
+	public void onLoaderReset(Loader<List<DbxFileInfo>> loader) {}
 
 	private void showUnlinkedView() {
 		getListView().setVisibility(View.GONE);
@@ -88,5 +112,19 @@ public class EpubListFragment extends ListFragment{
 		mLoadingSpinner.setVisibility(View.VISIBLE);
 		mLinkButton.setVisibility(View.GONE);
 		getView().postInvalidate();
+		doLoad(reset);
+	}
+
+	private void doLoad(boolean reset) {
+		if (mAccountManager.hasLinkedAccount()) {
+			mEmptyText.setVisibility(View.GONE);
+			mLoadingSpinner.setVisibility(View.VISIBLE);
+
+			if (reset) {
+				getLoaderManager().restartLoader(0, null, this);
+			} else {
+				getLoaderManager().initLoader(0, null, this);
+			}
+		}
 	}
 }
