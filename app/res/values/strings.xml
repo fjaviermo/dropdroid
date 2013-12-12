@@ -7,5 +7,7 @@
     <string name="no_epubs">No epubs</string>
     <string name="desc_icon">generic icon</string>
     <string name="unlink_from_dropbox">Unlink from Dropbox</string>
+    <string name="order_by_name">Order by name</string>
+    <string name="order_by_date">Order by date</string>
 
 </resources>

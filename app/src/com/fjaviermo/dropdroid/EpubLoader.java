@@ -15,6 +15,7 @@ import com.dropbox.sync.android.DbxFileInfo;
 import com.dropbox.sync.android.DbxFileSystem;
 import com.dropbox.sync.android.DbxFileSystem.PathListener.Mode;
 import com.dropbox.sync.android.DbxPath;
+import com.fjaviermo.comparator.EpubNameComparator;
 
 public class EpubLoader extends AsyncTaskLoader<List<DbxFileInfo>> {
 
@@ -33,7 +34,7 @@ public class EpubLoader extends AsyncTaskLoader<List<DbxFileInfo>> {
 	 *            Path of folder to start of load
 	 */
 	public EpubLoader(Context context, DbxAccountManager accountManager, DbxPath path) {
-		this(context, accountManager, path, EpubListComparator.getNameFirst(true));
+		this(context, accountManager, path,  new EpubNameComparator(true));
 	}
 
 	/**

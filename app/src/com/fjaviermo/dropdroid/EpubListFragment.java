@@ -1,5 +1,6 @@
 package com.fjaviermo.dropdroid;
 
+import java.util.Comparator;
 import java.util.List;
 
 import android.app.Activity;
@@ -19,7 +20,11 @@ import com.dropbox.sync.android.DbxAccountManager;
 import com.dropbox.sync.android.DbxFileInfo;
 import com.dropbox.sync.android.DbxPath;
 import com.fjaviermo.Utils.DropDroidConfig;
+import com.fjaviermo.Utils.Util;
+import com.fjaviermo.Utils.Util.SORT;
 import com.fjaviermo.adapter.EpubAdapter;
+import com.fjaviermo.comparator.EpubDateComparator;
+import com.fjaviermo.comparator.EpubNameComparator;
 
 public class EpubListFragment extends ListFragment implements LoaderCallbacks<List<DbxFileInfo>>{
 
@@ -28,6 +33,7 @@ public class EpubListFragment extends ListFragment implements LoaderCallbacks<Li
 	private View mLinkButton;
 	private View mLoadingSpinner;
 	private DbxAccountManager mAccountManager;
+	private SORT mSort= Util.SORT.NAME;
 
 	public EpubListFragment() {}
 
@@ -60,7 +66,7 @@ public class EpubListFragment extends ListFragment implements LoaderCallbacks<Li
 		super.onViewCreated(view, savedInstanceState);
 
 		getListView().setEmptyView(view.findViewById(android.R.id.empty));
-		
+
 		if (!mAccountManager.hasLinkedAccount()) {
 			showUnlinkedView();
 		} else {
@@ -84,29 +90,46 @@ public class EpubListFragment extends ListFragment implements LoaderCallbacks<Li
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// handle item selection
 		switch (item.getItemId()) {
+		case R.id.order_by_name:
+			mSort = Util.SORT.NAME;
+			doLoad(true);
+			return true;
+		case R.id.order_by_date:
+			mSort = Util.SORT.DATE;
+			doLoad(true);
+			return true;
 		case R.id.unlink_dropbox:
 			mAccountManager.unlink();
-            setListAdapter(null);
+			setListAdapter(null);
 			showUnlinkedView();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
 	}
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 0) {
-            if (resultCode == Activity.RESULT_OK) {
-                showLinkedView(true);
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
-    }
-    
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == 0) {
+			if (resultCode == Activity.RESULT_OK) {
+				showLinkedView(true);
+			}
+		} else {
+			super.onActivityResult(requestCode, resultCode, data);
+		}
+	}
+
 	@Override
 	public Loader<List<DbxFileInfo>> onCreateLoader(int id, Bundle args) {
-		return new EpubLoader(getActivity(), mAccountManager, DbxPath.ROOT);
+		Comparator<DbxFileInfo> sortComparator = null;
+		switch (mSort) {
+		case NAME:
+			sortComparator = new EpubNameComparator(true);
+			break;
+		case DATE:
+			sortComparator = new EpubDateComparator(true);
+			break;
+		}
+		return new EpubLoader(getActivity(), mAccountManager, DbxPath.ROOT, sortComparator);
 	}
 
 	@Override
