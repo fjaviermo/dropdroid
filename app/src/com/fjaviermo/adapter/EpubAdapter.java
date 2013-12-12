@@ -17,7 +17,7 @@ import com.fjaviermo.dropdroid.R;
 public class EpubAdapter extends ArrayAdapter<DbxFileInfo> {
 
 	private final List<DbxFileInfo> mEntries;
-	private final Activity mContext;
+	private final Activity mActivity;
 
 	static class ViewHolder {
 		public TextView epubName;
@@ -26,17 +26,17 @@ public class EpubAdapter extends ArrayAdapter<DbxFileInfo> {
 
 	}
 	
-	public EpubAdapter(Activity context, List<DbxFileInfo> entries) {
-		super(context, R.layout.epub_row, entries);
+	public EpubAdapter(Activity activity, List<DbxFileInfo> entries) {
+		super(activity, R.layout.epub_row, entries);
 		mEntries = entries;
-		mContext = context;
+		mActivity = activity;
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View rowView = convertView;
 		if (rowView == null) {
-			LayoutInflater inflater = mContext.getLayoutInflater();
+			LayoutInflater inflater = mActivity.getLayoutInflater();
 			rowView = inflater.inflate(R.layout.epub_row, null);
 			ViewHolder viewHolder = new ViewHolder();
 			viewHolder.epubName = (TextView) rowView.findViewById(R.id.epub_name);
@@ -49,8 +49,8 @@ public class EpubAdapter extends ArrayAdapter<DbxFileInfo> {
 		
 		DbxFileInfo info = mEntries.get(position);
 		holder.epubName.setText(info.path.getName());
-		String date = DateFormat.getMediumDateFormat(mContext).format(info.modifiedTime) + " " + 
-				    DateFormat.getTimeFormat(mContext).format(info.modifiedTime);
+		String date = DateFormat.getMediumDateFormat(mActivity.getApplicationContext()).format(info.modifiedTime) 
+				+ " " + DateFormat.getTimeFormat(mActivity.getApplicationContext()).format(info.modifiedTime);
 		holder.epubDate.setText(date);
 		holder.epubSize.setText(Util.readableFileSize(info.size));
 
