@@ -8,6 +8,7 @@ import java.util.List;
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.epub.EpubReader;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -193,18 +194,30 @@ ObtainCoverImageListener {
 		}
 	}
 
-	private class ShowCoverImage extends AsyncTask<DbxPath, Long, Bitmap> 
+	public void showDialog(Bitmap coverImage) {
+		DialogFragment coverImageDialog = CoverImageDialogFragment.newInstance(coverImage);
+		coverImageDialog.show(getActivity().getSupportFragmentManager(), null);		
+	}
+
+	@Override
+	public void ObtainCoverImage(int position) {
+		DbxFileInfo file = (DbxFileInfo) getListAdapter().getItem(position);
+		ObtainCoverImage obtainImage = new ObtainCoverImage();
+		obtainImage.execute(file.path);
+	}
+	
+	private class ObtainCoverImage extends AsyncTask<DbxPath, Long, Bitmap> 
 	{
+	    private ProgressDialog dialog = new ProgressDialog(getActivity());
 
 		@Override
 		protected void onPreExecute() {
-			System.out.println("Hi" + mLoadingSpinner);
-			mLoadingSpinner.setVisibility(View.VISIBLE);
+	        this.dialog.setMessage(getString(R.string.please_wait));
+	        this.dialog.show();
 		}
 
 		@Override
 		protected Bitmap doInBackground(DbxPath... params) {
-			mLoadingSpinner.setVisibility(View.VISIBLE);
 			Bitmap coverImage = null;
 			try {
 
@@ -224,20 +237,11 @@ ObtainCoverImageListener {
 		}
 		@Override
 		protected void onPostExecute(Bitmap result) {
-			mLoadingSpinner.setVisibility(View.GONE);
+	        if (dialog.isShowing()) {
+	            dialog.dismiss();
+	        }
+
 			showDialog(result);
 		}
-	}
-
-	public void showDialog(Bitmap coverImage) {
-		DialogFragment coverImageDialog = CoverImageDialogFragment.newInstance(coverImage);
-		coverImageDialog.show(getActivity().getSupportFragmentManager(), null);		
-	}
-
-	@Override
-	public void ObtainCoverImage(int position) {
-		DbxFileInfo file = (DbxFileInfo) getListAdapter().getItem(position);
-		ShowCoverImage obtainImage = new ShowCoverImage();
-		obtainImage.execute(file.path);
 	}
 }
