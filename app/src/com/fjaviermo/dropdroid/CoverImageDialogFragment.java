@@ -28,7 +28,7 @@ public final class CoverImageDialogFragment extends DialogFragment {
         byte[] byteArray = stream.toByteArray();
         args.putByteArray(IMAGE, byteArray);
         coverImageDialog.setArguments(args);
-
+        coverImageDialog.setStyle(DialogFragment.STYLE_NO_TITLE, 0);        
         return coverImageDialog;
     }
 
@@ -38,7 +38,6 @@ public final class CoverImageDialogFragment extends DialogFragment {
         
         byte[] byteArray = getArguments().getByteArray(IMAGE);
         mImage = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-        setStyle(DialogFragment.STYLE_NO_TITLE, 0);
     }
 
     @Override
