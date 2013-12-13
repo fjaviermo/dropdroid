@@ -8,13 +8,13 @@ import java.util.List;
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 
-import com.dropbox.sync.android.DbxAccount;
 import com.dropbox.sync.android.DbxAccountManager;
 import com.dropbox.sync.android.DbxException;
 import com.dropbox.sync.android.DbxFileInfo;
 import com.dropbox.sync.android.DbxFileSystem;
 import com.dropbox.sync.android.DbxFileSystem.PathListener.Mode;
 import com.dropbox.sync.android.DbxPath;
+import com.fjaviermo.Utils.DropDroidConfig;
 import com.fjaviermo.comparator.EpubNameComparator;
 
 public class EpubLoader extends AsyncTaskLoader<List<DbxFileInfo>> {
@@ -65,7 +65,7 @@ public class EpubLoader extends AsyncTaskLoader<List<DbxFileInfo>> {
 
 	@Override
 	protected void onStartLoading() {
-		DbxFileSystem fs = getDbxFileSystem();
+		DbxFileSystem fs = DropDroidConfig.getDbxFileSystem(mAccountManager);
 		if (fs != null) {
 			fs.addPathListener(mChangeListener, mPath, Mode.PATH_OR_DESCENDANT);
 		}
@@ -84,7 +84,7 @@ public class EpubLoader extends AsyncTaskLoader<List<DbxFileInfo>> {
 
 	@Override
 	protected void onStopLoading() {
-		DbxFileSystem fs = getDbxFileSystem();
+		DbxFileSystem fs = DropDroidConfig.getDbxFileSystem(mAccountManager);
 		if (fs != null) {
 			fs.removePathListener(mChangeListener, mPath, Mode.PATH_OR_DESCENDANT);
 		}
@@ -114,7 +114,7 @@ public class EpubLoader extends AsyncTaskLoader<List<DbxFileInfo>> {
 
 	@Override
 	public List<DbxFileInfo> loadInBackground() {
-		DbxFileSystem fs = getDbxFileSystem();
+		DbxFileSystem fs = DropDroidConfig.getDbxFileSystem(mAccountManager);
 		if (fs != null) {
 			try {
 				List<DbxFileInfo> entries = getAllFiles(fs.listFolder(mPath));
@@ -133,7 +133,7 @@ public class EpubLoader extends AsyncTaskLoader<List<DbxFileInfo>> {
 	}
 
 	private List<DbxFileInfo> getAllFiles(List<DbxFileInfo> listFolder) throws DbxException {
-		DbxFileSystem fs = getDbxFileSystem();
+		DbxFileSystem fs = DropDroidConfig.getDbxFileSystem(mAccountManager);
 
 		List<DbxFileInfo> files = new ArrayList<DbxFileInfo>();
 		for(DbxFileInfo element : listFolder) {
@@ -145,18 +145,5 @@ public class EpubLoader extends AsyncTaskLoader<List<DbxFileInfo>> {
 
 		}
 		return files;
-	}
-
-	private DbxFileSystem getDbxFileSystem() {
-		DbxAccount account = mAccountManager.getLinkedAccount();
-		if (account != null) {
-			try {
-				return DbxFileSystem.forAccount(account);
-			} catch (DbxException.Unauthorized e) {
-				// Account was unlinked asynchronously from server.
-				return null;
-			}
-		}
-		return null;
 	}
 }

@@ -2,7 +2,10 @@ package com.fjaviermo.Utils;
 
 import android.content.Context;
 
+import com.dropbox.sync.android.DbxAccount;
 import com.dropbox.sync.android.DbxAccountManager;
+import com.dropbox.sync.android.DbxException;
+import com.dropbox.sync.android.DbxFileSystem;
 
 public class DropDroidConfig {
 
@@ -15,4 +18,17 @@ public class DropDroidConfig {
     {
         return DbxAccountManager.getInstance(context.getApplicationContext(), APP_KEY, APP_SECRET);
     }
+    
+	public static DbxFileSystem getDbxFileSystem(DbxAccountManager accountManager) {
+		DbxAccount account = accountManager.getLinkedAccount();
+		if (account != null) {
+			try {
+				return DbxFileSystem.forAccount(account);
+			} catch (DbxException.Unauthorized e) {
+				// Account was unlinked asynchronously from server.
+				return null;
+			}
+		}
+		return null;
+	}
 }

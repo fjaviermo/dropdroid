@@ -25,9 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.dropbox.sync.android.DbxAccount;
 import com.dropbox.sync.android.DbxAccountManager;
-import com.dropbox.sync.android.DbxException;
 import com.dropbox.sync.android.DbxFile;
 import com.dropbox.sync.android.DbxFileInfo;
 import com.dropbox.sync.android.DbxFileSystem;
@@ -194,32 +192,23 @@ ObtainCoverImageListener {
 			}
 		}
 	}
-	private DbxFileSystem getDbxFileSystem() {
-		DbxAccount account = mAccountManager.getLinkedAccount();
-		if (account != null) {
-			try {
-				return DbxFileSystem.forAccount(account);
-			} catch (DbxException.Unauthorized e) {
-				// Account was unlinked asynchronously from server.
-				return null;
-			}
-		}
-		return null;
-	}
 
 	private class ShowCoverImage extends AsyncTask<DbxPath, Long, Bitmap> 
 	{
+
 		@Override
-		protected void onPostExecute(Bitmap result) {
-			showDialog(result);
+		protected void onPreExecute() {
+			System.out.println("Hi" + mLoadingSpinner);
+			mLoadingSpinner.setVisibility(View.VISIBLE);
 		}
 
 		@Override
 		protected Bitmap doInBackground(DbxPath... params) {
+			mLoadingSpinner.setVisibility(View.VISIBLE);
 			Bitmap coverImage = null;
 			try {
 
-				DbxFileSystem fs = getDbxFileSystem();
+				DbxFileSystem fs = DropDroidConfig.getDbxFileSystem(mAccountManager);
 				DbxFile file = fs.open(params[0]);
 
 				InputStream epubInputStream = file.getReadStream();
@@ -233,11 +222,16 @@ ObtainCoverImageListener {
 			}
 			return coverImage;
 		}
+		@Override
+		protected void onPostExecute(Bitmap result) {
+			mLoadingSpinner.setVisibility(View.GONE);
+			showDialog(result);
+		}
 	}
 
 	public void showDialog(Bitmap coverImage) {
-	    DialogFragment coverImageDialog = CoverImageDialogFragment.newInstance(coverImage);
-	    coverImageDialog.show(getActivity().getSupportFragmentManager(), null);		
+		DialogFragment coverImageDialog = CoverImageDialogFragment.newInstance(coverImage);
+		coverImageDialog.show(getActivity().getSupportFragmentManager(), null);		
 	}
 
 	@Override
