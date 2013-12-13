@@ -1,14 +1,23 @@
 package com.fjaviermo.dropdroid;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Comparator;
 import java.util.List;
 
+import nl.siegmann.epublib.domain.Book;
+import nl.siegmann.epublib.epub.EpubReader;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,18 +25,24 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.dropbox.sync.android.DbxAccount;
 import com.dropbox.sync.android.DbxAccountManager;
+import com.dropbox.sync.android.DbxException;
+import com.dropbox.sync.android.DbxFile;
 import com.dropbox.sync.android.DbxFileInfo;
+import com.dropbox.sync.android.DbxFileSystem;
 import com.dropbox.sync.android.DbxPath;
 import com.fjaviermo.Utils.DropDroidConfig;
 import com.fjaviermo.Utils.Util;
 import com.fjaviermo.Utils.Util.SORT;
 import com.fjaviermo.adapter.EpubAdapter;
+import com.fjaviermo.adapter.EpubAdapter.ObtainCoverImageListener;
 import com.fjaviermo.comparator.EpubDateComparator;
 import com.fjaviermo.comparator.EpubNameComparator;
 
-public class EpubListFragment extends ListFragment implements LoaderCallbacks<List<DbxFileInfo>>{
 
+public class EpubListFragment extends ListFragment implements LoaderCallbacks<List<DbxFileInfo>>, 
+ObtainCoverImageListener {
 
 	private View mEmptyText;
 	private View mLinkButton;
@@ -75,6 +90,12 @@ public class EpubListFragment extends ListFragment implements LoaderCallbacks<Li
 	}
 
 	@Override
+	public void onStart() {
+		super.onStart();
+		doLoad(false);
+	}
+
+	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		mAccountManager = DropDroidConfig.getAccountManager(activity);
@@ -107,6 +128,7 @@ public class EpubListFragment extends ListFragment implements LoaderCallbacks<Li
 			return super.onOptionsItemSelected(item);
 		}
 	}
+
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == 0) {
@@ -137,7 +159,7 @@ public class EpubListFragment extends ListFragment implements LoaderCallbacks<Li
 		mLoadingSpinner.setVisibility(View.GONE);
 		mEmptyText.setVisibility(View.VISIBLE);
 
-		setListAdapter(new EpubAdapter(getActivity(), data));
+		setListAdapter(new EpubAdapter(getActivity(), data,this));
 	}
 
 	@Override
@@ -171,5 +193,57 @@ public class EpubListFragment extends ListFragment implements LoaderCallbacks<Li
 				getLoaderManager().initLoader(0, null, this);
 			}
 		}
+	}
+	private DbxFileSystem getDbxFileSystem() {
+		DbxAccount account = mAccountManager.getLinkedAccount();
+		if (account != null) {
+			try {
+				return DbxFileSystem.forAccount(account);
+			} catch (DbxException.Unauthorized e) {
+				// Account was unlinked asynchronously from server.
+				return null;
+			}
+		}
+		return null;
+	}
+
+	private class ShowCoverImage extends AsyncTask<DbxPath, Long, Bitmap> 
+	{
+		@Override
+		protected void onPostExecute(Bitmap result) {
+			showDialog(result);
+		}
+
+		@Override
+		protected Bitmap doInBackground(DbxPath... params) {
+			Bitmap coverImage = null;
+			try {
+
+				DbxFileSystem fs = getDbxFileSystem();
+				DbxFile file = fs.open(params[0]);
+
+				InputStream epubInputStream = file.getReadStream();
+				// Load Book from inputStream
+				Book book = (new EpubReader()).readEpub(epubInputStream);
+
+				coverImage  = BitmapFactory.decodeStream(book.getCoverImage().getInputStream());
+				file.close();
+			} catch (IOException e) {
+				Log.e("epublib", e.getMessage());
+			}
+			return coverImage;
+		}
+	}
+
+	public void showDialog(Bitmap coverImage) {
+	    DialogFragment coverImageDialog = CoverImageDialogFragment.newInstance(coverImage);
+	    coverImageDialog.show(getActivity().getSupportFragmentManager(), null);		
+	}
+
+	@Override
+	public void ObtainCoverImage(int position) {
+		DbxFileInfo file = (DbxFileInfo) getListAdapter().getItem(position);
+		ShowCoverImage obtainImage = new ShowCoverImage();
+		obtainImage.execute(file.path);
 	}
 }
