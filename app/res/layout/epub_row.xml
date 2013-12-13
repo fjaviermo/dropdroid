@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:contentDescription="@string/desc_icon"
-        android:src="@drawable/ic_launcher" />
+        android:src="@drawable/epub"/>
 
     <TextView
         android:id="@+id/epub_name"
@@ -17,6 +17,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/epub_icon"
+        android:layout_marginLeft="5dp"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
