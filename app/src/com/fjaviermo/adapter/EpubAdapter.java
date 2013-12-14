@@ -8,26 +8,23 @@ import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.dropbox.sync.android.DbxFileInfo;
 import com.fjaviermo.Utils.Util;
 import com.fjaviermo.dropdroid.R;
 
-public class EpubAdapter extends ArrayAdapter<DbxFileInfo> {
+public class EpubAdapter extends ArrayAdapter<DbxFileInfo>{
 
 	private final List<DbxFileInfo> mEntries;
 	private final Activity mActivity;
+	GestureDetector mGestureDetector;
 	ObtainCoverImageListener mListener;
-	GestureDetector gestureDetector;
 
 	static class ViewHolder {
-		public ImageView epubIcon;
 		public TextView epubName;
 		public TextView epubDate;
 		public TextView epubSize;
@@ -38,8 +35,8 @@ public class EpubAdapter extends ArrayAdapter<DbxFileInfo> {
 		super(activity, R.layout.epub_row, entries);
 		mEntries = entries;
 		mActivity = activity;
-		this.mListener = callback;		
-		gestureDetector = new GestureDetector(activity.getApplicationContext(), new GestureListener());
+		mListener = callback;
+		mGestureDetector = new GestureDetector(activity.getApplicationContext(), new GestureListener());
 	}
 
 	@Override
@@ -49,22 +46,12 @@ public class EpubAdapter extends ArrayAdapter<DbxFileInfo> {
 			LayoutInflater inflater = mActivity.getLayoutInflater();
 			rowView = inflater.inflate(R.layout.epub_row, null);
 			ViewHolder viewHolder = new ViewHolder();
-			viewHolder.epubIcon = (ImageView) rowView.findViewById(R.id.epub_icon);
-			
-			viewHolder.epubIcon.setOnLongClickListener(new OnLongClickListener() {
 
-				@Override
-				public boolean onLongClick(View v) {
-					mListener.ObtainCoverImage(position);
-					return true;
-				}
-			});
-
-			viewHolder.epubIcon.setOnTouchListener( new OnTouchListener() {
+			rowView.setOnTouchListener( new OnTouchListener() {
 
 				@Override
 				public boolean onTouch(View v, MotionEvent event) {
-					boolean isDoubleTap = gestureDetector.onTouchEvent(event);
+					boolean isDoubleTap = mGestureDetector.onTouchEvent(event);
 					if(isDoubleTap) {
 						mListener.ObtainCoverImage(position);
 					}
@@ -72,7 +59,7 @@ public class EpubAdapter extends ArrayAdapter<DbxFileInfo> {
 					return true;
 				}
 			});
-
+			
 			viewHolder.epubName = (TextView) rowView.findViewById(R.id.epub_name);
 			viewHolder.epubDate = (TextView) rowView.findViewById(R.id.epub_date);
 			viewHolder.epubSize = (TextView) rowView.findViewById(R.id.epub_size);

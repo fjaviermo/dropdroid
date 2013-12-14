@@ -25,6 +25,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 
 import com.dropbox.sync.android.DbxAccountManager;
 import com.dropbox.sync.android.DbxFile;
@@ -86,6 +88,17 @@ ObtainCoverImageListener {
 		} else {
 			showLinkedView(false);
 		}
+
+		// No se ejecutará nunca al estar implementado el doble click
+		getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
+
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				ObtainCoverImage(position);
+				return true;
+			}
+		});
 	}
 
 	@Override
@@ -194,7 +207,7 @@ ObtainCoverImageListener {
 		}
 	}
 
-	public void showDialog(Bitmap coverImage) {
+	private void showDialog(Bitmap coverImage) {
 		DialogFragment coverImageDialog = CoverImageDialogFragment.newInstance(coverImage);
 		coverImageDialog.show(getActivity().getSupportFragmentManager(), null);		
 	}
@@ -205,15 +218,15 @@ ObtainCoverImageListener {
 		ObtainCoverImage obtainImage = new ObtainCoverImage();
 		obtainImage.execute(file.path);
 	}
-	
+
 	private class ObtainCoverImage extends AsyncTask<DbxPath, Long, Bitmap> 
 	{
-	    private ProgressDialog dialog = new ProgressDialog(getActivity());
+		private ProgressDialog dialog = new ProgressDialog(getActivity());
 
 		@Override
 		protected void onPreExecute() {
-	        this.dialog.setMessage(getString(R.string.please_wait));
-	        this.dialog.show();
+			this.dialog.setMessage(getString(R.string.please_wait));
+			this.dialog.show();
 		}
 
 		@Override
@@ -237,9 +250,9 @@ ObtainCoverImageListener {
 		}
 		@Override
 		protected void onPostExecute(Bitmap result) {
-	        if (dialog.isShowing()) {
-	            dialog.dismiss();
-	        }
+			if (dialog.isShowing()) {
+				dialog.dismiss();
+			}
 
 			showDialog(result);
 		}
