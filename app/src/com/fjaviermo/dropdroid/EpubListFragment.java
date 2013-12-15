@@ -207,6 +207,10 @@ ObtainCoverImageListener {
 		}
 	}
 
+	/**
+	 * Muestra un dialog con la imagen de portada deseada
+	 * @param coverImage imagen a mostrar
+	 */
 	private void showDialog(Bitmap coverImage) {
 		DialogFragment coverImageDialog = CoverImageDialogFragment.newInstance(coverImage);
 		coverImageDialog.show(getActivity().getSupportFragmentManager(), null);		
@@ -219,6 +223,12 @@ ObtainCoverImageListener {
 		obtainImage.execute(file.path);
 	}
 
+	/**
+	 * Clase que se encarga de obtener la imagen de portada de un archivo
+	 * de dropbox en un hilo aparte apra no colapsar el hilo principal
+	 * @author fjaviermo
+	 *
+	 */
 	private class ObtainCoverImage extends AsyncTask<DbxPath, Long, Bitmap> 
 	{
 		private ProgressDialog dialog = new ProgressDialog(getActivity());

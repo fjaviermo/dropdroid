@@ -19,9 +19,11 @@ import com.fjaviermo.dropdroid.R;
 
 public class EpubAdapter extends ArrayAdapter<DbxFileInfo>{
 
-	private final List<DbxFileInfo> mEntries;
+	private final List<DbxFileInfo> mFiles;
 	private final Activity mActivity;
 	GestureDetector mGestureDetector;
+	// Necesario para avisar mediante callback cuando se
+	// haya producido el doble click
 	ObtainCoverImageListener mListener;
 
 	static class ViewHolder {
@@ -31,9 +33,9 @@ public class EpubAdapter extends ArrayAdapter<DbxFileInfo>{
 
 	}
 
-	public EpubAdapter(Activity activity, List<DbxFileInfo> entries, ObtainCoverImageListener callback) {
-		super(activity, R.layout.epub_row, entries);
-		mEntries = entries;
+	public EpubAdapter(Activity activity, List<DbxFileInfo> files, ObtainCoverImageListener callback) {
+		super(activity, R.layout.epub_row, files);
+		mFiles = files;
 		mActivity = activity;
 		mListener = callback;
 		mGestureDetector = new GestureDetector(activity.getApplicationContext(), new GestureListener());
@@ -68,8 +70,8 @@ public class EpubAdapter extends ArrayAdapter<DbxFileInfo>{
 
 		ViewHolder holder = (ViewHolder) rowView.getTag();
 
-		DbxFileInfo info = mEntries.get(position);
-		holder.epubName.setText(info.path.getName());
+		DbxFileInfo info = mFiles.get(position);
+		holder.epubName.setText(Util.getBaseName("epub",info.path.getName()));
 
 		String date = DateFormat.getMediumDateFormat(mActivity.getApplicationContext()).format(info.modifiedTime) 
 				+ " " + DateFormat.getTimeFormat(mActivity.getApplicationContext()).format(info.modifiedTime);

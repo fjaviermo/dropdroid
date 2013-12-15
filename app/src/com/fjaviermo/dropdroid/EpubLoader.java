@@ -22,7 +22,6 @@ public class EpubLoader extends AsyncTaskLoader<List<DbxFileInfo>> {
 	private final DbxPath mPath;
 	private final DbxAccountManager mAccountManager;
 	private final Comparator<DbxFileInfo> mSortComparator;
-
 	private List<DbxFileInfo> mCachedContents;
 
 	/**
@@ -132,17 +131,25 @@ public class EpubLoader extends AsyncTaskLoader<List<DbxFileInfo>> {
 		return new ArrayList<DbxFileInfo>(0);
 	}
 
+	/**
+	 * Creamos una lista con todos los archivos que tiene la cuenta de dropbox
+	 * a partir de la lista de archivos y carpetas que se pasa como parámetro
+	 * @param listFolder lista de archivos y carpetas de dropbox
+	 * @return Lista de todos los archivos
+	 * @throws DbxException
+	 */
 	private List<DbxFileInfo> getAllFiles(List<DbxFileInfo> listFolder) throws DbxException {
 		DbxFileSystem fs = DropDroidConfig.getDbxFileSystem(mAccountManager);
 
 		List<DbxFileInfo> files = new ArrayList<DbxFileInfo>();
 		for(DbxFileInfo element : listFolder) {
 			if(element.isFolder) {
+				// Hacemos esto para obtener todos los archivos y no solo
+				// los de la carpeta original
 				files.addAll(getAllFiles(fs.listFolder(element.path)));
 			} else {
 				files.add(element);
 			}
-
 		}
 		return files;
 	}

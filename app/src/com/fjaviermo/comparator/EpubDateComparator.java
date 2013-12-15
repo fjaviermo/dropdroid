@@ -18,6 +18,9 @@ public class EpubDateComparator implements Comparator<DbxFileInfo> {
 		return isAscending ? rawCmp : -rawCmp;
 	}
 
+	/**
+	 * Comparamos los archivos según su fecha, nombre y tamaño.
+	 */
 	int rawCompare(DbxFileInfo lhs, DbxFileInfo rhs) {
 
 		int cmp = Util.compareDates(lhs.modifiedTime, rhs.modifiedTime);
@@ -31,7 +34,7 @@ public class EpubDateComparator implements Comparator<DbxFileInfo> {
 
 		// Use size as final qualifier, though names should be unique in a real
 		// folder listing.
-		long longcmp = lhs.size - rhs.size;
+		long longcmp = Util.compareSizes(lhs.size, rhs.size);
 		if (0 != longcmp) {
 			return longcmp < 0 ? -1 : 1;
 		}
